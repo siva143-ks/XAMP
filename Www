@@ -1,0 +1,45 @@
+URL url = new URL("https://yourgameapi.com/score");
+HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+urlConnection.setRequestMethod("POST");
+urlConnection.setDoOutput(true);
+urlConnection.setRequestProperty("Content-Type", "application/json");
+
+JSONObject data = new JSONObject();
+data.put("player_id", "12345");
+data.put("score", 2000);
+OutputStream os = urlConnection.getOutputStream();
+os.write(data.toString().getBytes());
+os.flush();
+os.close();
+
+// Read the response from the server
+InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+String response = readStream(in);
+<?php
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Get the raw POST data
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    // Connect to your database
+    $mysqli = new mysqli("localhost", "username", "password", "database");
+
+    if ($mysqli->connect_error) {
+        die("Connection failed: " . $mysqli->connect_error);
+    }
+
+    // Get player data from the POST request
+    $player_id = $mysqli->real_escape_string($data['player_id']);
+    $score = $mysqli->real_escape_string($data['score']);
+
+    // Insert the data into the database
+    $sql = "INSERT INTO scores (player_id, score) VALUES ('$player_id', '$score')";
+    if ($mysqli->query($sql) === TRUE) {
+        echo json_encode(["status" => "success"]);
+    } else {
+        echo json_encode(["status" => "error", "message" => "Error: " . $mysqli->error]);
+    }
+
+    // Close the connection
+    $mysqli->close();
+}
+?>
